@@ -1,0 +1,303 @@
+/* Enhanced Professional Auth Styles - Glass, Modern Card, Premium Inputs, Prominent Buttons */
+body,
+html,
+#root {
+    height: 100%;
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background:
+        radial-gradient(ellipse at 70% 18%, rgba(120, 170, 255, 0.17) 0%, rgba(66, 107, 167, 0) 80%),
+        radial-gradient(circle at 25% 90%, rgba(37, 87, 185, 0.14) 0%, rgba(66, 107, 167, 0) 78%),
+        linear-gradient(123deg, #25345d 0%, #35518b 60%, #253663 100%);
+    /* Subtle noise overlay */
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.22;
+    z-index: 0;
+    background: url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
+    /* subtle pattern for depth */
+}
+
+.main-bg {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.auth-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    /* Remove min-height to prevent scroll */
+}
+
+.auth-card {
+    background: rgba(255, 255, 255, 0.82);
+    padding: 2.8rem 2.3rem 2.2rem 2.3rem;
+    border-radius: 1.5rem;
+    border: 1.8px solid #e3ecff;
+    box-shadow:
+        0 10px 38px rgba(37, 98, 207, 0.14),
+        0 1.5px 9px rgba(115, 156, 255, 0.10),
+        0 1.5px 8px rgba(40, 116, 250, 0.08);
+    min-width: 340px;
+    max-width: 420px;
+    width: 100%;
+    max-height: 97vh;
+    margin: 2.6rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.auth-card::before {
+    content: '';
+    position: absolute;
+    left: -40px;
+    top: -48px;
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(120deg, #1769ff80 30%, #3ec7e0 90%, #fff0 100%);
+    opacity: 0.18;
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.auth-card>* {
+    position: relative;
+    z-index: 1;
+}
+
+h2 {
+    margin-top: 0.2rem;
+    margin-bottom: .7rem;
+    font-weight: 800;
+    letter-spacing: .01em;
+    font-size: 2.2rem;
+    color: #186cd4;
+    background: linear-gradient(90deg, #2562cf, #52b5f7 85%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-subtext {
+    margin-top: -.5rem;
+    margin-bottom: 1.8rem;
+    color: #3d5188;
+    font-size: 1.07rem;
+    opacity: 0.85;
+    text-align: center;
+}
+
+.auth-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+    margin-top: 0.5rem;
+    padding-bottom: 0.6rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+label {
+    font-size: 1.09rem;
+    letter-spacing: .01em;
+    color: #1751a0;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+input {
+    padding: 0.82rem 1.15rem;
+    border: 1.6px solid #b2ccf92a;
+    border-bottom: 2.5px solid #b6d0fa;
+    border-radius: 0.85rem;
+    background: rgba(245, 250, 253, .89);
+    font-size: 1.09rem;
+    outline: none;
+    transition: box-shadow 0.2s, border-color 0.2s, background 0.15s;
+    box-shadow: 0 0 0 rgba(37, 98, 207, 0), 0;
+}
+
+input:focus {
+    border-color: #399dff;
+    background: rgba(240, 246, 255, 0.96);
+    box-shadow: 0 0 0 2.2px #93b7f35c;
+}
+
+input.has-error {
+    border-color: #ec5076 !important;
+    border-bottom: 2.8px solid #e42147;
+    background: #ffeeea;
+}
+
+input::-webkit-input-placeholder {
+    color: #a5b8d6;
+    opacity: 1;
+}
+
+input::-moz-placeholder {
+    color: #a5b8d6;
+    opacity: 1;
+}
+
+input:-ms-input-placeholder {
+    color: #a5b8d6;
+    opacity: 1;
+}
+
+input::placeholder {
+    color: #a5b8d6;
+    opacity: 1;
+}
+
+.primary-btn {
+    background: linear-gradient(93deg, #2562cf 0%, #52b5f7 90%);
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: .025em;
+    text-transform: none;
+    padding: 0.92rem 0;
+    border: none;
+    border-radius: 0.9rem;
+    font-size: 1.16rem;
+    margin-top: 0.18rem;
+    box-shadow: 0 4px 18px rgba(37, 98, 207, 0.07);
+    cursor: pointer;
+    transition: background 0.13s, box-shadow 0.13s, transform 0.09s;
+    will-change: transform;
+    outline: none;
+}
+
+.primary-btn:hover:not(:disabled),
+.primary-btn:focus-visible:not(:disabled) {
+    background: linear-gradient(90deg, #52b5f7 0%, #1769ff 99%);
+    box-shadow: 0 8px 24px rgba(37, 98, 207, 0.11);
+    transform: translateY(-2.5px) scale(1.037);
+}
+
+.primary-btn:disabled {
+    background: #b1c4e4;
+    color: #eef2f7;
+    opacity: 0.7;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.divider {
+    height: 1px;
+    width: 98%;
+    margin: 1.15rem auto 1.15rem auto;
+    background: linear-gradient(90deg, #ffffff77 0%, #2874fa20 50%, #fff0 100%);
+    border: none;
+}
+
+.form-links {
+    margin-top: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1.02rem;
+    color: #3873ea;
+    gap: 0.38rem;
+}
+
+.form-links span,
+.forgot-link {
+    width: 100%;
+    text-align: center;
+}
+
+.form-links a,
+.forgot-link a {
+    color: #2874fa;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.13s;
+}
+
+.form-links a:hover,
+.forgot-link a:hover {
+    color: #1454e3;
+    text-decoration: underline;
+}
+
+.forgot-link {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    opacity: 0.88;
+    text-align: center;
+}
+
+.error-alert {
+    background: #ffeef1;
+    color: #e02b45;
+    border: 1.2px solid #f4c8d1;
+    border-radius: 0.77rem;
+    padding: 0.75rem 1.08rem;
+    margin-top: 0.4rem;
+    font-size: 1.08rem;
+    font-weight: 500;
+    text-align: center;
+    letter-spacing: .017em;
+}
+
+.success-alert {
+    background: #ebfbee;
+    color: #12a756;
+    border: 1.2px solid #b2e0c7;
+    border-radius: 0.77rem;
+    padding: 0.75rem 1.08rem;
+    margin-top: 0.4rem;
+    font-size: 1.08rem;
+    font-weight: 500;
+    text-align: center;
+    letter-spacing: .017em;
+}
+
+.error-text {
+    color: #e12d4a;
+    font-size: 0.995em;
+    margin-top: 0.10rem;
+    font-weight: 600;
+    letter-spacing: .01em;
+}
+
+@media (max-width: 600px) {
+    .auth-card {
+        padding: 1.25rem 0.4rem 1.6rem 0.4rem;
+        min-width: unset;
+        max-width: 99vw;
+    }
+
+    .main-bg,
+    .auth-container {
+        padding: 0;
+    }
+
+    h2 {
+        font-size: 1.44rem;
+        margin-bottom: 0.4rem;
+    }
+}
