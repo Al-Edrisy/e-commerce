@@ -1,0 +1,191 @@
+# 🐳 Docker Setup for Product Service
+
+## Quick Start with Docker
+
+### 1️⃣ Make sure Docker Desktop is running
+- Open Docker Desktop application
+- Wait for it to start (icon should be steady, not animated)
+
+### 2️⃣ Build and Run with Docker Compose
+
+```bash
+# Navigate to product-service folder
+cd product-service
+
+# Build and start everything (service + database)
+docker-compose up --build
+
+# Or run in background (detached mode)
+docker-compose up -d --build
+```
+
+### 3️⃣ Your service is now running!
+- **Product Service:** http://localhost:8000
+- **API Docs:** http://localhost:8000/docs
+- **Health Check:** http://localhost:8000/health
+- **PostgreSQL Database:** localhost:5433
+
+## 📝 Useful Docker Commands
+
+### Start/Stop Services
+```bash
+# Start services
+docker-compose up
+
+# Start in background
+docker-compose up -d
+
+# Stop services
+docker-compose down
+
+# Stop and remove volumes (clean database)
+docker-compose down -v
+```
+
+### View Logs
+```bash
+# See all logs
+docker-compose logs
+
+# See product-service logs only
+docker-compose logs product-service
+
+# Follow logs in real-time
+docker-compose logs -f product-service
+```
+
+### Check Status
+```bash
+# See running containers
+docker ps
+
+# See all containers (including stopped)
+docker ps -a
+
+# Check service health
+docker-compose ps
+```
+
+### Rebuild After Code Changes
+```bash
+# Rebuild and restart
+docker-compose up --build
+
+# Force rebuild from scratch
+docker-compose build --no-cache
+```
+
+## 🔧 Troubleshooting
+
+### Port Already in Use
+If port 8000 is already used:
+1. Stop the Python service: `Ctrl+C` in terminal
+2. Or change port in `docker-compose.yml` to 8001
+
+### Docker Desktop Not Running
+```
+Cannot connect to the Docker daemon
+```
+**Solution:** Start Docker Desktop application
+
+### Permission Denied
+On Linux/Mac, use `sudo`:
+```bash
+sudo docker-compose up
+```
+
+### Clean Everything (Fresh Start)
+```bash
+# Stop all containers
+docker-compose down
+
+# Remove all volumes (database data)
+docker-compose down -v
+
+# Remove all images
+docker system prune -a
+
+# Then rebuild
+docker-compose up --build
+```
+
+## 🎯 Testing Your Dockerized Service
+
+### Using Browser
+1. Go to http://localhost:8000/docs
+2. Try the endpoints directly from the browser
+
+### Using curl
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Get products (if endpoint exists)
+curl http://localhost:8000/api/products
+```
+
+### Using Python
+```python
+import requests
+
+# Test health endpoint
+response = requests.get("http://localhost:8000/health")
+print(response.json())
+```
+
+## 📁 File Structure You Should Have
+
+```
+product-service/
+├── app/
+│   ├── config/
+│   ├── models/
+│   ├── routes/
+│   └── schemas/
+├── venv/              (not in Docker, local only)
+├── main.py            (your FastAPI app)
+├── requirements.txt   (Python packages)
+├── Dockerfile        ✅ (created above)
+├── docker-compose.yml ✅ (created above)
+├── .dockerignore     ✅ (created above)
+├── .env              ✅ (created above)
+├── .env.example      ✅ (created above)
+└── .gitignore        ✅ (updated above)
+```
+
+## ✅ Completing Your Jira Tasks
+
+Now you can mark these as DONE:
+- ✅ Set up product service Docker configuration (Dockerfile + docker-compose.yml)
+- ✅ Configure product service environment variables (.env file)
+
+## 🚀 Next Steps
+
+1. **Test with Docker:**
+   ```bash
+   docker-compose up --build
+   ```
+
+2. **Verify it works:**
+   - Open http://localhost:8000/health
+
+3. **Update Jira:**
+   - Mark all 6 tasks as completed!
+
+4. **Commit your work:**
+   ```bash
+   git add .
+   git commit -m "Add Docker configuration and environment variables for Product Service"
+   git push origin feature/product-service
+   ```
+
+## 💡 Tips
+
+- **Hot Reload:** Code changes automatically reload (no need to rebuild)
+- **Database Persistence:** Data saved in Docker volume survives restarts
+- **Network:** All services can communicate using container names
+- **Logs:** Always check logs if something doesn't work
+
+---
+
+**You're all set! Your Product Service is fully containerized and ready for deployment!** 🎉
