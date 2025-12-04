@@ -69,16 +69,35 @@ router.use(
 
 /**
  * Order Service Routes
- * All order endpoints require authentication
  */
+
+// Public health check endpoint (no authentication required)
+router.use(
+  '/orders/health',
+  apiLimiter,
+  createProxyMiddleware({
+    target: serviceUrls.orderService,
+    pathRewrite: { '^/api/orders/health': '/api/v1/orders/health' },
+    changeOrigin: true,
+  })
+);
+
+// All other order endpoints require authentication
 router.use(
   '/orders',
   apiLimiter,
   verifyToken,
   createProxyMiddleware({
     target: serviceUrls.orderService,
-    pathRewrite: { '^/api/orders': '/api/orders' },
+    pathRewrite: { '^/api/orders': '/api/v1/orders' },
     changeOrigin: true,
+    onProxyReq: (proxyReq, req) => {
+      // Ensure X-User-UID header is forwarded to Order Service
+      const userUid = req.headers['x-user-uid'];
+      if (userUid) {
+        proxyReq.setHeader('X-User-UID', userUid as string);
+      }
+    },
   })
 );
 
@@ -90,6 +109,13 @@ router.use(
     target: serviceUrls.orderService,
     pathRewrite: { '^/api/payments': '/api/payments' },
     changeOrigin: true,
+    onProxyReq: (proxyReq, req) => {
+      // Ensure X-User-UID header is forwarded to Order Service
+      const userUid = req.headers['x-user-uid'];
+      if (userUid) {
+        proxyReq.setHeader('X-User-UID', userUid as string);
+      }
+    },
   })
 );
 

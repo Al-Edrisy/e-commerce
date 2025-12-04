@@ -1,0 +1,201 @@
+{
+    "info": {
+        "name": "Order Service API",
+        "description": "Direct API collection for Order Service (Java/Spring Boot)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "version": "1.0.0"
+    },
+    "variable": [
+        {
+            "key": "ORDER_SERVICE_URL",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "FIREBASE_ID_TOKEN",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "USER_ID",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "ORDER_ID",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{FIREBASE_ID_TOKEN}}",
+                "type": "string"
+            }
+        ]
+    },
+    "item": [
+        {
+            "name": "Health Check",
+            "request": {
+                "auth": {
+                    "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{ORDER_SERVICE_URL}}/api/v1/orders/health",
+                    "host": [
+                        "{{ORDER_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "orders",
+                        "health"
+                    ]
+                },
+                "description": "Check if the Order Service is healthy and running"
+            }
+        },
+        {
+            "name": "Create Order",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "if (pm.response.code === 200 || pm.response.code === 201) {",
+                            "    const jsonData = pm.response.json();",
+                            "    if (jsonData.id) {",
+                            "        pm.environment.set('ORDER_ID', jsonData.id);",
+                            "        console.log('Order ID saved:', jsonData.id);",
+                            "    }",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "X-User-UID",
+                        "value": "{{USER_ID}}",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"userUid\": \"{{USER_ID}}\",\n  \"shippingAddress\": \"123 Main St, New York, NY 10001, USA\",\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"productName\": \"Laptop Dell XPS 15\",\n      \"quantity\": 2,\n      \"unitPrice\": 1299.99\n    },\n    {\n      \"productId\": 5,\n      \"productName\": \"Wireless Mouse\",\n      \"quantity\": 1,\n      \"unitPrice\": 29.99\n    }\n  ]\n}"
+                },
+                "url": {
+                    "raw": "{{ORDER_SERVICE_URL}}/api/v1/orders",
+                    "host": [
+                        "{{ORDER_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "orders"
+                    ]
+                },
+                "description": "Create a new order with items. Requires authentication and X-User-UID header."
+            }
+        },
+        {
+            "name": "Get Order by ID",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "X-User-UID",
+                        "value": "{{USER_ID}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{ORDER_SERVICE_URL}}/api/v1/orders/{{ORDER_ID}}",
+                    "host": [
+                        "{{ORDER_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "orders",
+                        "{{ORDER_ID}}"
+                    ]
+                },
+                "description": "Get detailed information about a specific order"
+            }
+        },
+        {
+            "name": "Get User Orders",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "X-User-UID",
+                        "value": "{{USER_ID}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{ORDER_SERVICE_URL}}/api/v1/orders",
+                    "host": [
+                        "{{ORDER_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "orders"
+                    ]
+                },
+                "description": "Get all orders for the authenticated user"
+            }
+        },
+        {
+            "name": "Update Order Status",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "X-User-UID",
+                        "value": "{{USER_ID}}",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"status\": \"PROCESSING\"\n}"
+                },
+                "url": {
+                    "raw": "{{ORDER_SERVICE_URL}}/api/v1/orders/{{ORDER_ID}}/status",
+                    "host": [
+                        "{{ORDER_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "orders",
+                        "{{ORDER_ID}}",
+                        "status"
+                    ]
+                },
+                "description": "Update the status of an order. Valid statuses: PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED"
+            }
+        }
+    ]
+}

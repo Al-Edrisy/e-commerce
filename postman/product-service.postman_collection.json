@@ -1,0 +1,342 @@
+{
+    "info": {
+        "name": "Product Service API",
+        "description": "Direct API collection for Product Service (Python/FastAPI)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "version": "1.0.0"
+    },
+    "variable": [
+        {
+            "key": "PRODUCT_SERVICE_URL",
+            "value": "http://localhost:8000",
+            "type": "string"
+        },
+        {
+            "key": "FIREBASE_ID_TOKEN",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "PRODUCT_ID",
+            "value": "1",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Health Check",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{PRODUCT_SERVICE_URL}}/health",
+                    "host": [
+                        "{{PRODUCT_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "health"
+                    ]
+                },
+                "description": "Check if the Product Service is healthy and running"
+            }
+        },
+        {
+            "name": "Get All Products",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{PRODUCT_SERVICE_URL}}/api/products/?page=1&limit=10",
+                    "host": [
+                        "{{PRODUCT_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "products",
+                        ""
+                    ],
+                    "query": [
+                        {
+                            "key": "page",
+                            "value": "1"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "10"
+                        }
+                    ]
+                },
+                "description": "Get a paginated list of all products"
+            }
+        },
+        {
+            "name": "Get Product by ID",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{PRODUCT_SERVICE_URL}}/api/products/{{PRODUCT_ID}}",
+                    "host": [
+                        "{{PRODUCT_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "products",
+                        "{{PRODUCT_ID}}"
+                    ]
+                },
+                "description": "Get detailed information about a specific product"
+            }
+        },
+        {
+            "name": "Search Products",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{PRODUCT_SERVICE_URL}}/api/products/search?q=laptop",
+                    "host": [
+                        "{{PRODUCT_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "products",
+                        "search"
+                    ],
+                    "query": [
+                        {
+                            "key": "q",
+                            "value": "laptop"
+                        }
+                    ]
+                },
+                "description": "Search products using Elasticsearch full-text search"
+            }
+        },
+        {
+            "name": "Filter Products by Category",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{PRODUCT_SERVICE_URL}}/api/products/?category=electronics&min_price=100&max_price=1000",
+                    "host": [
+                        "{{PRODUCT_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "products",
+                        ""
+                    ],
+                    "query": [
+                        {
+                            "key": "category",
+                            "value": "electronics"
+                        },
+                        {
+                            "key": "min_price",
+                            "value": "100"
+                        },
+                        {
+                            "key": "max_price",
+                            "value": "1000"
+                        }
+                    ]
+                },
+                "description": "Filter products by category and price range"
+            }
+        },
+        {
+            "name": "Get Categories",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{PRODUCT_SERVICE_URL}}/api/categories/",
+                    "host": [
+                        "{{PRODUCT_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "categories",
+                        ""
+                    ]
+                },
+                "description": "Get all available product categories"
+            }
+        },
+        {
+            "name": "Create Product (Admin)",
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "{{FIREBASE_ID_TOKEN}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"New Product\",\n  \"description\": \"Product description\",\n  \"price\": 99.99,\n  \"category\": \"electronics\",\n  \"stock\": 100,\n  \"image_url\": \"https://example.com/image.jpg\"\n}"
+                },
+                "url": {
+                    "raw": "{{PRODUCT_SERVICE_URL}}/api/products/",
+                    "host": [
+                        "{{PRODUCT_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "products",
+                        ""
+                    ]
+                },
+                "description": "Create a new product (requires admin authentication)"
+            }
+        },
+        {
+            "name": "Update Product (Admin)",
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "{{FIREBASE_ID_TOKEN}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Updated Product Name\",\n  \"price\": 89.99,\n  \"stock\": 150\n}"
+                },
+                "url": {
+                    "raw": "{{PRODUCT_SERVICE_URL}}/api/products/{{PRODUCT_ID}}",
+                    "host": [
+                        "{{PRODUCT_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "products",
+                        "{{PRODUCT_ID}}"
+                    ]
+                },
+                "description": "Update an existing product (requires admin authentication)"
+            }
+        },
+        {
+            "name": "Delete Product (Admin)",
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "{{FIREBASE_ID_TOKEN}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{PRODUCT_SERVICE_URL}}/api/products/{{PRODUCT_ID}}",
+                    "host": [
+                        "{{PRODUCT_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "products",
+                        "{{PRODUCT_ID}}"
+                    ]
+                },
+                "description": "Delete a product (requires admin authentication)"
+            }
+        },
+        {
+            "name": "Validate Products",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "[\n  {\n    \"productId\": 1,\n    \"quantity\": 2\n  },\n  {\n    \"productId\": 2,\n    \"quantity\": 1\n  }\n]"
+                },
+                "url": {
+                    "raw": "{{PRODUCT_SERVICE_URL}}/api/products/validate",
+                    "host": [
+                        "{{PRODUCT_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "products",
+                        "validate"
+                    ]
+                },
+                "description": "Validates product availability and stock for order creation. Used by Order Service."
+            }
+        },
+        {
+            "name": "Check Product Exists",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{PRODUCT_SERVICE_URL}}/api/products/{{PRODUCT_ID}}/exists",
+                    "host": [
+                        "{{PRODUCT_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "products",
+                        "{{PRODUCT_ID}}",
+                        "exists"
+                    ]
+                },
+                "description": "Checks if a product exists by ID. Returns boolean."
+            }
+        },
+        {
+            "name": "Get Product Stock",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{PRODUCT_SERVICE_URL}}/api/products/{{PRODUCT_ID}}/stock",
+                    "host": [
+                        "{{PRODUCT_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "products",
+                        "{{PRODUCT_ID}}",
+                        "stock"
+                    ]
+                },
+                "description": "Gets the current stock quantity for a product. Returns integer."
+            }
+        }
+    ]
+}

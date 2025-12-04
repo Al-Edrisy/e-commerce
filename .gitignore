@@ -9,6 +9,8 @@ __pycache__/
 pip-log.txt
 pip-delete-this-directory.txt
 
+
+
 # IDEs
 .vscode/
 .idea/
@@ -18,7 +20,6 @@ pip-delete-this-directory.txt
 .DS_Store
 
 # Environment variables
-.env
 *.env
 !.env.example
 
@@ -53,3 +54,20 @@ mvnw.cmd
 *.db
 *.sqlite
 
+
+# Postman (Old)
+postman_collection.json
+
+# Testing
+coverage/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Secrets
+**/*.json
+!**/package.json
+!**/package-lock.json
+!**/tsconfig.json
+!postman/*.json
+!postman_collection.json

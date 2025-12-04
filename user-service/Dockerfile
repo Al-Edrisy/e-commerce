@@ -1,14 +1,16 @@
+# Use official Node.js LTS Alpine image for smaller size
 FROM node:18-alpine
 
-WORKDIR /app
+# Set working directory
+WORKDIR /usr/src/app
 
-# Copy package files
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install dependencies (production only)
+RUN npm install --production && npm cache clean --force
 
-# Copy source code
+# Copy the rest of the application code
 COPY . .
 
 # Create non-root user
@@ -16,14 +18,15 @@ RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
 # Change ownership
-RUN chown -R nodejs:nodejs /app
+RUN chown -R nodejs:nodejs /usr/src/app
 USER nodejs
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
+# Expose port 3001
 EXPOSE 3001
 
+# Start the service using npm
 CMD ["npm", "start"]
-
