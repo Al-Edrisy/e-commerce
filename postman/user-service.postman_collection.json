@@ -1,0 +1,256 @@
+{
+    "info": {
+        "name": "User Service API",
+        "description": "Direct API collection for User Service (Firebase/Firestore)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "version": "1.0.0"
+    },
+    "variable": [
+        {
+            "key": "USER_SERVICE_URL",
+            "value": "http://localhost:3001",
+            "type": "string"
+        },
+        {
+            "key": "FIREBASE_ID_TOKEN",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "USER_ID",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Health Check",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{USER_SERVICE_URL}}/health",
+                    "host": [
+                        "{{USER_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "health"
+                    ]
+                },
+                "description": "Check if the User Service is healthy and running"
+            }
+        },
+        {
+            "name": "Register User",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "if (pm.response.code === 200 || pm.response.code === 201) {",
+                            "    const jsonData = pm.response.json();",
+                            "    if (jsonData.idToken) {",
+                            "        pm.environment.set('FIREBASE_ID_TOKEN', jsonData.idToken);",
+                            "        pm.environment.set('USER_ID', jsonData.uid);",
+                            "        console.log('Token saved:', jsonData.idToken);",
+                            "        console.log('User ID saved:', jsonData.uid);",
+                            "    }",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"Test123!\",\n  \"displayName\": \"Test User\"\n}"
+                },
+                "url": {
+                    "raw": "{{USER_SERVICE_URL}}/users/register",
+                    "host": [
+                        "{{USER_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "users",
+                        "register"
+                    ]
+                },
+                "description": "Register a new user with Firebase Authentication"
+            }
+        },
+        {
+            "name": "Login User",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "if (pm.response.code === 200) {",
+                            "    const jsonData = pm.response.json();",
+                            "    if (jsonData.idToken) {",
+                            "        pm.environment.set('FIREBASE_ID_TOKEN', jsonData.idToken);",
+                            "        pm.environment.set('USER_ID', jsonData.uid);",
+                            "        console.log('Token saved:', jsonData.idToken);",
+                            "        console.log('User ID saved:', jsonData.uid);",
+                            "    }",
+                            "}"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"Test123!\"\n}"
+                },
+                "url": {
+                    "raw": "{{USER_SERVICE_URL}}/users/login",
+                    "host": [
+                        "{{USER_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "users",
+                        "login"
+                    ]
+                },
+                "description": "Login an existing user with Firebase Authentication"
+            }
+        },
+        {
+            "name": "Verify Token",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"token\": \"{{FIREBASE_ID_TOKEN}}\"\n}"
+                },
+                "url": {
+                    "raw": "{{USER_SERVICE_URL}}/users/verify-token",
+                    "host": [
+                        "{{USER_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "users",
+                        "verify-token"
+                    ]
+                },
+                "description": "Verify a Firebase ID token and get user information"
+            }
+        },
+        {
+            "name": "Get User Profile",
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "{{FIREBASE_ID_TOKEN}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{USER_SERVICE_URL}}/users/profile",
+                    "host": [
+                        "{{USER_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "users",
+                        "profile"
+                    ]
+                },
+                "description": "Get the authenticated user's profile information"
+            }
+        },
+        {
+            "name": "Update User Profile",
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "{{FIREBASE_ID_TOKEN}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"displayName\": \"Updated Name\",\n  \"phoneNumber\": \"+1234567890\"\n}"
+                },
+                "url": {
+                    "raw": "{{USER_SERVICE_URL}}/users/profile",
+                    "host": [
+                        "{{USER_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "users",
+                        "profile"
+                    ]
+                },
+                "description": "Update the authenticated user's profile information"
+            }
+        },
+        {
+            "name": "Logout User",
+            "request": {
+                "auth": {
+                    "type": "bearer",
+                    "bearer": [
+                        {
+                            "key": "token",
+                            "value": "{{FIREBASE_ID_TOKEN}}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": {
+                    "raw": "{{USER_SERVICE_URL}}/users/logout",
+                    "host": [
+                        "{{USER_SERVICE_URL}}"
+                    ],
+                    "path": [
+                        "users",
+                        "logout"
+                    ]
+                },
+                "description": "Logout the authenticated user"
+            }
+        }
+    ]
+}

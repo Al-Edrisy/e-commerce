@@ -1,26 +1,77 @@
 version: '3.8'
 
 services:
-  # Shared PostgreSQL Database
-  postgres:
+  # Product Service PostgreSQL Database
+  postgres-product:
     image: postgres:15-alpine
-    container_name: postgres-ecommerce
+    container_name: postgres-product
     environment:
-      POSTGRES_DB: ecommerce
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: product_database
+      POSTGRES_USER: product_user
+      POSTGRES_PASSWORD: product_pass
+      POSTGRES_INITDB_ARGS: "-E UTF8"
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres-product-data:/var/lib/postgresql/data
+      - ./database/product-service-init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - ecommerce-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ecommerce"]
+      test: [ "CMD-SHELL", "pg_isready -U product_user -d product_database" ]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # Order Service PostgreSQL Database
+  postgres-order:
+    image: postgres:15-alpine
+    container_name: postgres-order
+    environment:
+      POSTGRES_DB: order_database
+      POSTGRES_USER: order_user
+      POSTGRES_PASSWORD: order_pass
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-order-data:/var/lib/postgresql/data
+      - ./database/order-service-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U order_user -d order_database" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # API Gateway PostgreSQL Database
+  postgres-gateway:
+    image: postgres:15-alpine
+    container_name: postgres-gateway
+    environment:
+      POSTGRES_DB: gateway_database
+      POSTGRES_USER: gateway_user
+      POSTGRES_PASSWORD: gateway_pass
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-gateway-data:/var/lib/postgresql/data
+      - ./database/gateway-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U gateway_user -d gateway_database" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
 
   # Elasticsearch for Product Service
   elasticsearch:
@@ -30,6 +81,11 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     ports:
       - "9200:9200"
     volumes:
@@ -37,12 +93,14 @@ services:
     networks:
       - ecommerce-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      test: [ "CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 60s
+    restart: unless-stopped
 
-  # User Service
+  # User Service (Firebase/Firestore)
   user-service:
     build:
       context: ./user-service
@@ -53,19 +111,18 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ecommerce
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-    depends_on:
-      postgres:
-        condition: service_healthy
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
     networks:
       - ecommerce-network
-    volumes:
-      - ./user-service:/app
-      - /app/node_modules
+    healthcheck:
+      test: [ "CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" ]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
 
   # Product Service
   product-service:
@@ -76,21 +133,28 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DB_HOST: postgres
+      DB_HOST: postgres-product
       DB_PORT: 5432
-      DB_NAME: ecommerce
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      DB_NAME: product_database
+      DB_USER: product_user
+      DB_PASSWORD: product_pass
       ELASTICSEARCH_URL: http://elasticsearch:9200
+      USER_SERVICE_URL: http://user-service:3001
+      ORDER_SERVICE_URL: http://order-service:8080
     depends_on:
-      postgres:
+      postgres-product:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
     networks:
       - ecommerce-network
-    volumes:
-      - ./product-service:/app
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
 
   # Order Service
   order-service:
@@ -101,16 +165,33 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-order:5432/order_database
+      SPRING_DATASOURCE_USERNAME: order_user
+      SPRING_DATASOURCE_PASSWORD: order_pass
+      USER_SERVICE_URL: http://user-service:3001
+      PRODUCT_SERVICE_URL: http://product-service:8000
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+      JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
     depends_on:
-      postgres:
+      postgres-order:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      product-service:
         condition: service_healthy
     networks:
       - ecommerce-network
-    volumes:
-      - ./order-service:/app
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/v1/orders/health" ]
+      interval: 30s
+      timeout: 3s
+      start_period: 40s
+      retries: 3
+    restart: unless-stopped
 
   # API Gateway
   api-gateway:
@@ -126,36 +207,73 @@ services:
       USER_SERVICE_URL: http://user-service:3001
       PRODUCT_SERVICE_URL: http://product-service:8000
       ORDER_SERVICE_URL: http://order-service:8080
+      DB_HOST: postgres-gateway
+      DB_PORT: 5432
+      DB_NAME: gateway_database
+      DB_USER: gateway_user
+      DB_PASSWORD: gateway_pass
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
     depends_on:
-      - user-service
-      - product-service
-      - order-service
+      postgres-gateway:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
     networks:
       - ecommerce-network
-    volumes:
-      - ./api-gateway:/app
-      - /app/node_modules
+    healthcheck:
+      test: [ "CMD", "node", "-e", "require('http').get('http://localhost:4000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" ]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
 
   # Frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
+        - VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}
+        - VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+        - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
+        - VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}
+        - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+        - VITE_FIREBASE_MEASUREMENT_ID=${VITE_FIREBASE_MEASUREMENT_ID}
+        - VITE_API_GATEWAY_URL=http://localhost:4000
     container_name: frontend
     ports:
       - "3000:80"
     environment:
-      REACT_APP_API_GATEWAY_URL: http://localhost:4000
+      VITE_API_GATEWAY_URL: http://localhost:4000
     depends_on:
-      - api-gateway
+      api-gateway:
+        condition: service_healthy
     networks:
       - ecommerce-network
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/" ]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    restart: unless-stopped
 
 networks:
   ecommerce-network:
     driver: bridge
 
 volumes:
-  postgres-data:
+  postgres-product-data:
+  postgres-order-data:
+  postgres-gateway-data:
   elasticsearch-data:
+
 
