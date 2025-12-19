@@ -7,16 +7,6 @@ const app = express();
 // Middleware: JSON body parsing
 app.use(express.json());
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    service: 'user-service',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  });
-});
-
 // Mount user-related routes
 app.use('/api/users', userRoutes);
 
