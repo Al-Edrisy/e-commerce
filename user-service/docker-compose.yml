@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "${PORT:-5000}:5000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=5000
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      - RATE_LIMIT_WINDOW=${RATE_LIMIT_WINDOW:-900000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - SESSION_EXPIRY_DAYS=${SESSION_EXPIRY_DAYS:-7}
+      - MAX_SESSIONS_PER_USER=${MAX_SESSIONS_PER_USER:-5}
+      - SESSION_SECRET=${SESSION_SECRET:-default-secret-change-in-production}
+    depends_on:
+      - redis
+    networks:
+      - user-service-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  redis:
+    image: redis:7-alpine
+    container_name: user-service-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - user-service-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+volumes:
+  redis-data:
+    driver: local
+networks:
+  user-service-network:
+    driver: bridge
+

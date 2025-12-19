@@ -1,0 +1,47 @@
+// Firestore Security Rules for User Service
+// Apply these rules in Firebase Console: Firestore Database > Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow all operations for development
+    // IMPORTANT: Restrict these rules in production!
+    match /{document=**} {
+      allow read, write: if true;
+    }
+    
+    // Production-ready rules (comment out the above and uncomment below):
+    /*
+    // Users collection
+    match /users/{userId} {
+      // Allow users to read their own profile
+      allow read: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow users to update their own profile (restricted fields)
+      allow update: if request.auth != null && request.auth.uid == userId
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status', 'created_at']);
+      
+      // Allow service account (Admin SDK) full access
+      allow read, write: if request.auth.token.admin == true;
+      
+      // Addresses subcollection
+      match /addresses/{addressId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // Sessions collection
+    match /sessions/{sessionId} {
+      allow read: if request.auth != null && resource.data.user_id == request.auth.uid;
+      allow write: if request.auth != null && request.resource.data.user_id == request.auth.uid;
+    }
+    */
+  }
+}
+
+// NOTES:
+// 1. The Admin SDK bypasses these rules completely (uses service account credentials)
+// 2. These rules only affect client SDK access
+// 3. For development, the permissive rules (allow read, write: if true) are fine
+// 4. For production, use the commented-out rules above or customize as needed
+
