@@ -251,7 +251,28 @@ exports.setUserRole = async (req, res) => {
     const { uid, role } = req.body;
     if (!uid || !role) return res.status(400).json({ error: 'uid and role required' });
     try {
-        await userProfileService.setUserRole(uid, role);
+        // Try with timeout
+        try {
+            await Promise.race([
+                userProfileService.setUserRole(uid, role),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Firestore timeout')), 10000)
+                )
+            ]);
+        } catch (timeoutError) {
+            if (timeoutError.message === 'Firestore timeout') {
+                console.warn('[SET_USER_ROLE] Firestore timed out');
+                return res.status(202).json({
+                    message: 'Role change request accepted',
+                    uid,
+                    role,
+                    note: 'Role change may not be immediately reflected due to database timeout',
+                    firestore_issue: true
+                });
+            }
+            throw timeoutError;
+        }
+
         res.json({ message: `Role set to ${role} for user ${uid}` });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -666,23 +687,55 @@ exports.login = async (req, res) => {
 
         console.log(`[LOGIN] Firebase auth successful for UID: ${localId}`);
 
-        // Try to get user profile with timeout
+        // Try to get user profile with timeout (increased to 10s for existing users)
         let userProfile;
+        let firestoreTimedOut = false;
         try {
             userProfile = await Promise.race([
                 userProfileService.getUserProfile(localId),
                 new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Firestore timeout')), 5000)
+                    setTimeout(() => reject(new Error('Firestore timeout')), 10000)
                 )
             ]);
         } catch (profileError) {
-            console.warn('[LOGIN] Firestore profile lookup timed out, creating basic profile');
-            userProfile = null;
+            if (profileError.message === 'Firestore timeout') {
+                console.warn('[LOGIN] Firestore profile lookup timed out - returning basic info from Firebase Auth');
+                firestoreTimedOut = true;
+                // Don't set userProfile to null - we'll return basic info instead
+            } else {
+                console.error('[LOGIN] Error fetching profile:', profileError.message);
+            }
         }
 
-        // If no profile exists, create a basic one
+        // If Firestore timed out, return basic info from Firebase Auth without creating a profile
+        if (firestoreTimedOut) {
+            const userEmail = firebaseResponse.data.email || email;
+
+            // Try to update last login (non-blocking, ignore if it fails)
+            const ip_address = req.ip || req.connection.remoteAddress || '';
+            const user_agent = req.headers['user-agent'] || '';
+            userProfileService.updateLastLogin(localId, { ip_address, user_agent }).catch(err => {
+                console.error('[LOGIN] Failed to update last login:', err.message);
+            });
+
+            emitEvent('user.login', { uid: localId });
+
+            return res.json({
+                message: 'Login successful',
+                idToken,
+                uid: localId,
+                profile: {
+                    uid: localId,
+                    email: userEmail,
+                    note: 'Full profile unavailable due to database timeout. Your data is safe.',
+                    firestore_issue: true
+                }
+            });
+        }
+
+        // If no profile exists (not a timeout, but genuinely doesn't exist), create a basic one
         if (!userProfile) {
-            console.log('[LOGIN] No profile found, creating basic profile');
+            console.log('[LOGIN] No profile found in Firestore, creating basic profile for new user');
             try {
                 const userEmail = firebaseResponse.data.email || email;
                 const ip_address = req.ip || req.connection.remoteAddress || '';
@@ -701,10 +754,24 @@ exports.login = async (req, res) => {
                     email_verified: false,
                     profile_completed: false
                 });
-                console.log('[LOGIN] Basic profile created successfully');
+                console.log('[LOGIN] Basic profile created successfully for new user');
             } catch (createError) {
                 console.error('[LOGIN] Failed to create profile:', createError.message);
-                // Continue anyway, profile will be created on next update
+                // Continue anyway, return basic info from Firebase Auth
+                const userEmail = firebaseResponse.data.email || email;
+                emitEvent('user.login', { uid: localId });
+
+                return res.json({
+                    message: 'Login successful',
+                    idToken,
+                    uid: localId,
+                    profile: {
+                        uid: localId,
+                        email: userEmail,
+                        note: 'Profile creation failed but login successful. Profile will be created on next update.',
+                        firestore_issue: true
+                    }
+                });
             }
         }
 
@@ -772,7 +839,28 @@ exports.getMe = async (req, res) => {
 exports.restoreProfile = async (req, res) => {
     try {
         const userId = req.user.uid;
-        const restored = await userProfileService.restoreUserProfile(userId);
+
+        // Try with timeout
+        let restored;
+        try {
+            restored = await Promise.race([
+                userProfileService.restoreUserProfile(userId),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Firestore timeout')), 10000)
+                )
+            ]);
+        } catch (timeoutError) {
+            if (timeoutError.message === 'Firestore timeout') {
+                console.warn('[RESTORE_PROFILE] Firestore timed out');
+                return res.status(202).json({
+                    message: 'Restore request accepted',
+                    note: 'Profile restoration may not be immediately reflected due to database timeout',
+                    firestore_issue: true
+                });
+            }
+            throw timeoutError;
+        }
+
         res.json({ message: 'Profile restored successfully', profile: restored });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -783,7 +871,29 @@ exports.restoreProfile = async (req, res) => {
 exports.restoreUserById = async (req, res) => {
     try {
         const { uid } = req.params;
-        const restored = await userProfileService.restoreUserProfile(uid);
+
+        // Try with timeout
+        let restored;
+        try {
+            restored = await Promise.race([
+                userProfileService.restoreUserProfile(uid),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Firestore timeout')), 10000)
+                )
+            ]);
+        } catch (timeoutError) {
+            if (timeoutError.message === 'Firestore timeout') {
+                console.warn('[RESTORE_USER_BY_ID] Firestore timed out');
+                return res.status(202).json({
+                    message: 'Restore request accepted',
+                    uid,
+                    note: 'User restoration may not be immediately reflected due to database timeout',
+                    firestore_issue: true
+                });
+            }
+            throw timeoutError;
+        }
+
         res.json({ message: 'User restored successfully', profile: restored });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -804,7 +914,28 @@ exports.cleanupPermanentDeletes = async (req, res) => {
 exports.deactivateAccount = async (req, res) => {
     try {
         const userId = req.user.uid;
-        const updated = await userProfileService.updateUserProfile(userId, { status: 'inactive' });
+
+        // Try with timeout
+        let updated;
+        try {
+            updated = await Promise.race([
+                userProfileService.updateUserProfile(userId, { status: 'inactive' }),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Firestore timeout')), 10000)
+                )
+            ]);
+        } catch (timeoutError) {
+            if (timeoutError.message === 'Firestore timeout') {
+                console.warn('[DEACTIVATE_ACCOUNT] Firestore timed out');
+                return res.status(202).json({
+                    message: 'Deactivation request accepted',
+                    note: 'Account status change may not be immediately reflected due to database timeout',
+                    firestore_issue: true
+                });
+            }
+            throw timeoutError;
+        }
+
         res.json({ message: 'Account deactivated', profile: updated });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -815,7 +946,28 @@ exports.deactivateAccount = async (req, res) => {
 exports.reactivateAccount = async (req, res) => {
     try {
         const userId = req.user.uid;
-        const updated = await userProfileService.updateUserProfile(userId, { status: 'active' });
+
+        // Try with timeout
+        let updated;
+        try {
+            updated = await Promise.race([
+                userProfileService.updateUserProfile(userId, { status: 'active' }),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Firestore timeout')), 10000)
+                )
+            ]);
+        } catch (timeoutError) {
+            if (timeoutError.message === 'Firestore timeout') {
+                console.warn('[REACTIVATE_ACCOUNT] Firestore timed out');
+                return res.status(202).json({
+                    message: 'Reactivation request accepted',
+                    note: 'Account status change may not be immediately reflected due to database timeout',
+                    firestore_issue: true
+                });
+            }
+            throw timeoutError;
+        }
+
         res.json({ message: 'Account reactivated', profile: updated });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -869,9 +1021,28 @@ exports.changeEmail = async (req, res) => {
             return res.status(401).json({ error: 'Password is incorrect' });
         }
 
-        // Update email
+        // Update email in Firebase Auth
         await auth.updateUser(userId, { email: new_email });
-        await userProfileService.updateUserProfile(userId, { email: new_email, email_verified: false });
+
+        // Update email in Firestore with timeout
+        try {
+            await Promise.race([
+                userProfileService.updateUserProfile(userId, { email: new_email, email_verified: false }),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Firestore timeout')), 10000)
+                )
+            ]);
+        } catch (timeoutError) {
+            if (timeoutError.message === 'Firestore timeout') {
+                console.warn('[CHANGE_EMAIL] Firestore profile update timed out');
+                return res.json({
+                    message: 'Email changed in authentication system. Profile update pending.',
+                    note: 'Profile may not reflect new email immediately due to database timeout',
+                    firestore_issue: true
+                });
+            }
+            throw timeoutError;
+        }
 
         res.json({ message: 'Email changed successfully. Please verify your new email.' });
     } catch (error) {
