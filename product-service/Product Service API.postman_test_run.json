@@ -1,0 +1,681 @@
+{
+	"id": "4335d184-ef94-4fa9-a216-86521a255f60",
+	"name": "Product Service API",
+	"timestamp": "2025-12-17T10:36:48.627Z",
+	"collection_id": "50802792-aa407ba2-1333-4aef-ad5c-7ed9e454fc32",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 3,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2025-12-17T10:36:41.460Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "688a4ac6-aa27-4e77-9a0d-435ac70dd94b",
+			"name": "Health Check",
+			"url": "http://localhost:8000/health",
+			"time": 126,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				126
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "1186cd78-817e-42b6-a257-9b905ceabdc0",
+			"name": "Bulk Index Products to Elasticsearch",
+			"url": "http://localhost:8000/api/products/index-all",
+			"time": 253,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				253
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "6fa1c3d1-bef8-408f-95e3-ca78990c05fe",
+			"name": "Get All Products",
+			"url": "http://localhost:8000/api/products/",
+			"time": 254,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Response has pagination metadata": true,
+				"Items array exists": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has pagination metadata": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Items array exists": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				254
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Response has pagination metadata": true,
+					"Items array exists": true
+				}
+			]
+		},
+		{
+			"id": "49245daa-944f-43a4-8811-d2b31bd7f5bd",
+			"name": "Get Products (Paginated)",
+			"url": "http://localhost:8000/api/products/?skip=0&limit=5",
+			"time": 34,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				34
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "07f6fbc0-b212-4729-9976-a925849adad8",
+			"name": "Get Single Product",
+			"url": "http://localhost:8000/api/products/1",
+			"time": 47,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				47
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "e01db9d5-9fe4-4a3a-aee1-10551298651b",
+			"name": "Get Products by Category",
+			"url": "http://localhost:8000/api/products/?category_id=1",
+			"time": 132,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				132
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "0f2fb111-d378-4fc5-a882-834deb356d24",
+			"name": "Get Product Stock",
+			"url": "http://localhost:8000/api/products/1/stock",
+			"time": 25,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				25
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "efb80f92-4571-44f5-8277-55592e6f6a4b",
+			"name": "Check Product Exists",
+			"url": "http://localhost:8000/api/products/1/exists",
+			"time": 31,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				31
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "c0fadcea-dd2a-44b0-b884-880633368228",
+			"name": "Search Products",
+			"url": "http://localhost:8000/api/products/search?q=wireless",
+			"time": 1004,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				1004
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "387028c2-4766-4a1a-8fa1-f4f7ab7b26b5",
+			"name": "Search with Filters",
+			"url": "http://localhost:8000/api/products/search?q=laptop&min_price=500&max_price=1000&category_id=1",
+			"time": 99,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				99
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "7a02151b-f020-4141-b0f1-544579928f10",
+			"name": "Product Suggestions",
+			"url": "http://localhost:8000/api/products/suggest?prefix=wire",
+			"time": 124,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				124
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "3bb5beb3-4fde-464d-8447-500908b093b0",
+			"name": "Create Product",
+			"url": "http://localhost:8000/api/products/",
+			"time": 287,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				287
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "c815269e-5fbd-4de8-b6e2-83ef28779ddd",
+			"name": "Update Product",
+			"url": "http://localhost:8000/api/products/1",
+			"time": 159,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				159
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "e6e5b6c9-eb9f-4d5c-8717-100e827198f3",
+			"name": "Delete Product",
+			"url": "http://localhost:8000/api/products/17",
+			"time": 91,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				91
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "c1583424-e431-45ee-9c9f-c8ac81f3c166",
+			"name": "Reduce Stock",
+			"url": "http://localhost:8000/api/products/1/reduce-stock?quantity=2",
+			"time": 43,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				43
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "51e9f8da-b0f9-4747-80c6-f7449a0be92c",
+			"name": "Validate Products (Valid)",
+			"url": "http://localhost:8000/api/products/validate",
+			"time": 26,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				26
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "81b0a441-9b9a-4155-9cf2-9f329637d664",
+			"name": "Validate Products (Insufficient Stock)",
+			"url": "http://localhost:8000/api/products/validate",
+			"time": 20,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				20
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "0ba95d70-3505-4192-a2ed-101f73dc4ecb",
+			"name": "Validate Products (Not Found)",
+			"url": "http://localhost:8000/api/products/validate",
+			"time": 18,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				18
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "00fade68-88d4-4a0c-acf6-e47895a35794",
+			"name": "Get All Categories",
+			"url": "http://localhost:8000/api/categories/",
+			"time": 93,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				93
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "ea054e38-99d3-494a-809e-71b934b0068a",
+			"name": "Get Category by ID",
+			"url": "http://localhost:8000/api/categories/1",
+			"time": 28,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				28
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "ce21f573-a0db-4cf7-bbb2-dbe8829cf7f4",
+			"name": "Create Category",
+			"url": "http://localhost:8000/api/categories/",
+			"time": 56,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				56
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "7f59ae83-5bc6-4b9f-9d20-01c9919e6bf5",
+			"name": "Update Category",
+			"url": "http://localhost:8000/api/categories/1",
+			"time": 73,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				73
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "5b288713-c689-41dd-aff5-03b0093eda49",
+			"name": "Delete Category",
+			"url": "http://localhost:8000/api/categories/5",
+			"time": 51,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				51
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "46f38a4c-d1eb-4e24-bde8-d5f41fc8a243",
+			"name": "Get All Reviews",
+			"url": "http://localhost:8000/api/reviews/",
+			"time": 119,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				119
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b264dc9b-286e-4466-9758-a6e93b5607b1",
+			"name": "Get Reviews by Product",
+			"url": "http://localhost:8000/api/reviews/?product_id=1",
+			"time": 34,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				34
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "6bbcaaac-5d7a-451e-8e33-826b285e935f",
+			"name": "Get Review Stats",
+			"url": "http://localhost:8000/api/reviews/stats/1",
+			"time": 47,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				47
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "5d8da6e3-4735-40ce-b5b2-ff8d5ada8d33",
+			"name": "Create Review",
+			"url": "http://localhost:8000/api/reviews/",
+			"time": 123,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				123
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "c3716f1c-6f3c-461f-ae2e-463fa12fc1ec",
+			"name": "Update Review",
+			"url": "http://localhost:8000/api/reviews/1",
+			"time": 51,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				51
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "cb620ac6-8acb-4b0c-b3ad-0db1062a562c",
+			"name": "Delete Review",
+			"url": "http://localhost:8000/api/reviews/1",
+			"time": 56,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				56
+			],
+			"allTests": [
+				{}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 3504,
+	"collection": {
+		"requests": [
+			{
+				"id": "688a4ac6-aa27-4e77-9a0d-435ac70dd94b",
+				"method": "GET"
+			},
+			{
+				"id": "1186cd78-817e-42b6-a257-9b905ceabdc0",
+				"method": "POST"
+			},
+			{
+				"id": "6fa1c3d1-bef8-408f-95e3-ca78990c05fe",
+				"method": "GET"
+			},
+			{
+				"id": "49245daa-944f-43a4-8811-d2b31bd7f5bd",
+				"method": "GET"
+			},
+			{
+				"id": "07f6fbc0-b212-4729-9976-a925849adad8",
+				"method": "GET"
+			},
+			{
+				"id": "e01db9d5-9fe4-4a3a-aee1-10551298651b",
+				"method": "GET"
+			},
+			{
+				"id": "0f2fb111-d378-4fc5-a882-834deb356d24",
+				"method": "GET"
+			},
+			{
+				"id": "efb80f92-4571-44f5-8277-55592e6f6a4b",
+				"method": "GET"
+			},
+			{
+				"id": "c0fadcea-dd2a-44b0-b884-880633368228",
+				"method": "GET"
+			},
+			{
+				"id": "387028c2-4766-4a1a-8fa1-f4f7ab7b26b5",
+				"method": "GET"
+			},
+			{
+				"id": "7a02151b-f020-4141-b0f1-544579928f10",
+				"method": "GET"
+			},
+			{
+				"id": "3bb5beb3-4fde-464d-8447-500908b093b0",
+				"method": "POST"
+			},
+			{
+				"id": "c815269e-5fbd-4de8-b6e2-83ef28779ddd",
+				"method": "PUT"
+			},
+			{
+				"id": "e6e5b6c9-eb9f-4d5c-8717-100e827198f3",
+				"method": "DELETE"
+			},
+			{
+				"id": "c1583424-e431-45ee-9c9f-c8ac81f3c166",
+				"method": "PATCH"
+			},
+			{
+				"id": "51e9f8da-b0f9-4747-80c6-f7449a0be92c",
+				"method": "POST"
+			},
+			{
+				"id": "81b0a441-9b9a-4155-9cf2-9f329637d664",
+				"method": "POST"
+			},
+			{
+				"id": "0ba95d70-3505-4192-a2ed-101f73dc4ecb",
+				"method": "POST"
+			},
+			{
+				"id": "00fade68-88d4-4a0c-acf6-e47895a35794",
+				"method": "GET"
+			},
+			{
+				"id": "ea054e38-99d3-494a-809e-71b934b0068a",
+				"method": "GET"
+			},
+			{
+				"id": "ce21f573-a0db-4cf7-bbb2-dbe8829cf7f4",
+				"method": "POST"
+			},
+			{
+				"id": "7f59ae83-5bc6-4b9f-9d20-01c9919e6bf5",
+				"method": "PUT"
+			},
+			{
+				"id": "5b288713-c689-41dd-aff5-03b0093eda49",
+				"method": "DELETE"
+			},
+			{
+				"id": "46f38a4c-d1eb-4e24-bde8-d5f41fc8a243",
+				"method": "GET"
+			},
+			{
+				"id": "b264dc9b-286e-4466-9758-a6e93b5607b1",
+				"method": "GET"
+			},
+			{
+				"id": "6bbcaaac-5d7a-451e-8e33-826b285e935f",
+				"method": "GET"
+			},
+			{
+				"id": "5d8da6e3-4735-40ce-b5b2-ff8d5ada8d33",
+				"method": "POST"
+			},
+			{
+				"id": "c3716f1c-6f3c-461f-ae2e-463fa12fc1ec",
+				"method": "PUT"
+			},
+			{
+				"id": "cb620ac6-8acb-4b0c-b3ad-0db1062a562c",
+				"method": "DELETE"
+			}
+		]
+	}
+}
